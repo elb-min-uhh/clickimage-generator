@@ -219,6 +219,7 @@
         imageCon.appendChild(pin);
         resetPinAddition();
 
+        addPinEditPanel(pin);
         selectPin(pin);
     }
 
@@ -227,7 +228,11 @@
      * @param {*} pin
      */
     function selectPin(pin) {
-        console.log("Selected", pin.id);
+        removeClassForAll(document.querySelectorAll('.image_wrap .image_con > .image_pin'), "active");
+        pin.classList.add("active");
+
+        removeClassForAll(document.querySelectorAll('.edit_con > .edit_panels > .edit_panel'), "active");
+        document.getElementById(pin.id.replace("pin_", "pin_edit_")).classList.add("active");
     }
 
     /**
@@ -290,10 +295,60 @@
 
     function getFirstUniqueIndex() {
         for(var i = 1; i < Number.MAX_SAFE_INTEGER; i++) {
-            if(!document.querySelector('.image_wrap .image_con .image_pin[data-pin-index="' + i + '"]')) {
+            if(!document.querySelector('.image_wrap .image_con > .image_pin[data-pin-index="' + i + '"]')) {
                 return i;
             }
         }
+    }
+
+    function addPinEditPanel(pin) {
+        var con = document.createElement('div');
+        con.innerHTML = DEFAULT_EDIT_PANEL;
+
+        var panel = con.firstChild;
+        panel.id = pin.id.replace("pin_", "pin_edit_");
+
+        var pinOrientationSelect = panel.querySelector('.pin_orientation');
+        var pinIndexInput = panel.querySelector('.pin_index');
+
+        // set current values
+        pinOrientationSelect.value = getPinOrientation(pin);
+        pinIndexInput.value = pin.dataset.pinIndex;
+
+        // add listeners
+        pinOrientationSelect.addEventListener('change', function() {
+            setPinOrientation(pin, pinOrientationSelect.value);
+        });
+
+        panel.querySelector('.pin_update_index').addEventListener('click', function() {
+            try {
+                var index = parseInt(pinIndexInput.value, 10);
+                updatePinIndex(pin, index);
+                pinIndexInput.value = pin.dataset.pinIndex;
+            } catch(e) {
+                // do nothing
+            }
+        });
+
+        var edit_panels = document.querySelector('.edit_panels');
+        if(edit_panels.children.length === 0) edit_panels.parentElement.classList.add('active');
+        edit_panels.append(panel);
+    }
+
+    function setPinOrientation(pin, orientation) {
+        pin.classList.remove("bottom");
+        pin.classList.remove("top");
+        pin.classList.remove("left");
+        pin.classList.remove("right");
+        pin.classList.add(orientation);
+    }
+
+    function getPinOrientation(pin) {
+        var orientation = "bottom";
+        if(pin.classList.contains("top")) orientation = "top";
+        else if(pin.classList.contains("left")) orientation = "left";
+        else if(pin.classList.contains("right")) orientation = "right";
+        return orientation;
     }
 
     function resetPinAddition() {
@@ -338,5 +393,37 @@
 
         return pos;
     }
+
+    function removeClassForAll(elements, clazz) {
+        for(var i = 0; i < elements.length; i++) {
+            elements[i].classList.remove(clazz);
+        }
+    }
+
+    // const elements
+
+    var DEFAULT_EDIT_PANEL =
+        '<div class="edit_panel">'
+        + '<div class="edit_tools">'
+        + '    <label>'
+        + '        Orientation:'
+        + '        <select class="pin_orientation">'
+        + '            <option value="top">Up</option>'
+        + '            <option value="bottom">Down</option>'
+        + '            <option value="left">Left</option>'
+        + '            <option value="right">Right</option>'
+        + '        </select>'
+        + '    </label>'
+        + '    <label>'
+        + '        Index:'
+        + '        <input type="number" class="pin_index" step="1" />'
+        + '        <button class="pin_update_index">Update</button>'
+        + '    </label>'
+        + '    <label>'
+        + '        <button class="pin_move">Move</button>'
+        + '    </label>'
+        + '</div >'
+        + '<textarea class="pin_text" placeholder="Enter HTML..."></textarea>'
+        + '</div >';
 
 })();

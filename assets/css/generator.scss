@@ -92,6 +92,10 @@ a.normal {
     text-decoration: none;
 }
 
+input[type="number"]:invalid {
+    outline: red auto 5px;
+}
+
 .wrap {
     vertical-align: center;
     max-width: 1100px;
@@ -118,10 +122,16 @@ a.normal {
     }
 }
 
-.heading {
+.heading,
+.heading_2 {
     color: $highlight;
     font-size: 180%;
-    margin: .5rem 0 1.5rem;
+    margin: 1.5rem 0 1.5rem;
+}
+
+.heading_2 {
+    font-size: 140%;
+    margin-bottom: .5rem;
 }
 
 .footer {
@@ -332,7 +342,8 @@ a.normal {
     margin-left: -1rem;
 }
 
-.image_pin:hover:before {
+.image_pin:hover:before,
+.image_pin.active:before {
     background-color: $uhh_red;
 }
 
@@ -442,4 +453,45 @@ a.normal {
 
 .general_buttons {
     margin-top: 1rem;
+}
+
+/* Pin Edit */
+
+.edit_con {
+    display: none;
+    margin-top: 1rem;
+}
+
+.edit_con.active {
+    display: block;
+}
+
+.edit_panel {
+    display: none;
+}
+
+.edit_panel.active {
+    display: block;
+}
+
+.edit_panel .edit_tools {
+    margin-bottom: .5rem;
+}
+
+.edit_panel .edit_tools label {
+    margin: 0 .25rem;
+}
+
+.edit_panel .edit_tools label:first-of-type {
+    margin-left: 0;
+}
+
+.edit_panel .edit_tools label:last-of-type {
+    margin-right: 0;
+}
+
+.edit_panel .pin_text {
+    min-height: 5rem;
+    width: 100%;
+    resize: vertical;
 }
