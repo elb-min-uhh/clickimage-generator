@@ -230,28 +230,61 @@
         console.log("Selected", pin.id);
     }
 
-    function setPinIndex(pin, index, originalPin) {
-        console.log(arguments);
-        var imageCon = document.querySelector('.image_wrap .image_con');
-        var pinToEdit = imageCon.querySelector('.image_pin[data-pin-index="' + index + '"]');
-
-        var currentIndex = pin.dataset.pinIndex ? parseInt(pin.dataset.pinIndex, 10) : -1;
+    /**
+     * Update the index of a pin. Will rearrange other pins on collision.
+     * @param {*} pin the dom element of the .image_pin to change the index of
+     * @param {*} index the index to change it to
+     */
+    function updatePinIndex(pin, index) {
+        var currentIndex = pin.dataset.pinIndex ? parseInt(pin.dataset.pinIndex, 10) : Number.MAX_SAFE_INTEGER;
         if(currentIndex == index) return;
 
-        // increment the index of the pin currently using this index
-        if(pinToEdit && pinToEdit !== pin && pinToEdit !== originalPin) {
-            setPinIndex(pinToEdit, index + 1, originalPin ? originalPin : pin);
+        // to place it after the given index when increasing the index
+        // will create a gap filled by `rearrangePinIndices` to match the initial
+        // index.
+        // otherwise before (default)
+        if(index > currentIndex) index++;
+
+        // increment all pins indices with their idx >= `index`
+        var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
+        for(var i = 0; i < pins.length; i++) {
+            if(pins[i] === pin) continue;
+
+            var pinIndex = pins[i].dataset.pinIndex ? parseInt(pins[i].dataset.pinIndex, 10) : -1;
+            if(pinIndex >= index)
+                setPinIndex(pins[i], pinIndex + 1);
         }
 
+        setPinIndex(pin, index);
+        rearrangePinIndices();
+    }
+
+    /**
+     * Sets the pins index to a given value without checking or rearranging of
+     * other pins.
+     * @param {*} pin the dom element of the .image_pin to change the index of
+     * @param {*} index the index to change it to
+     */
+    function setPinIndex(pin, index) {
         pin.dataset.pinIndex = index;
         pin.querySelector('.pin_text').innerText = index;
+    }
 
-        // decrement the index of following pins because the index gets free
-        if(!pinToEdit) {
-            pinToEdit = imageCon.querySelector('.image_pin[data-pin-index="' + (currentIndex + 1) + '"]');
-            if(pinToEdit && pinToEdit !== pin && pinToEdit !== originalPin) {
-                setPinIndex(pinToEdit, currentIndex, originalPin ? originalPin : pin);
-            }
+    /**
+     * Rearranges all pins to fill gaps. e.g. [1, 2, 4, 7] will be rearranged
+     * to [1, 2, 3, 4].
+     */
+    function rearrangePinIndices() {
+        var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
+        var pinsArray = Array.prototype.slice.call(pins, 0);
+        pinsArray.sort(function(a, b) {
+            return (a.dataset.pinIndex ? parseInt(a.dataset.pinIndex, 10) : Number.MAX_SAFE_INTEGER)
+                - (b.dataset.pinIndex ? parseInt(b.dataset.pinIndex, 10) : Number.MAX_SAFE_INTEGER);
+        });
+
+        // set new index
+        for(var i = 0; i < pinsArray.length; i++) {
+            if(pinsArray[i].dataset.pinIndex != (i + 1)) setPinIndex(pinsArray[i], i + 1);
         }
     }
 
