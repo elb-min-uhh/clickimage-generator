@@ -113,31 +113,41 @@
     function initPinButtonListeners() {
         document.querySelector('.pin_add').addEventListener('click', onAddPin);
 
-        document.querySelector('.show_source').addEventListener('click', function() {
-            console.log("SOURCE");
-        });
+        document.querySelector('.show_source').addEventListener('click', onShowSource);
 
-        document.querySelector('.show_demo').addEventListener('click', function() {
-            console.log("DEMO");
-        });
+        document.querySelector('.show_demo').addEventListener('click', onShowDemo);
 
         document.querySelector('.image_wrap').addEventListener('click', function(e) {
-
             if(this.classList.contains('image_displayed')) {
                 onImageClick(e);
             }
         });
+
+        document.addEventListener('click', function() {
+            resetPinAddition();
+        });
     }
 
-    function onAddPin() {
+    function onAddPin(event) {
+        event.stopPropagation();
         resetPinAddition();
 
         var imageWrap = document.querySelector('.image_wrap');
         imageWrap.classList.add("positioning");
     }
 
+    function onShowSource() {
+        console.log("SOURCE");
+    }
+
+    function onShowDemo() {
+        console.log("DEMO");
+    }
+
     function onImageClick(event) {
         var imageWrap = document.querySelector('.image_wrap');
+
+        event.stopPropagation();
 
         if(imageWrap.classList.contains('positioning')) {
             var posRel = getPositionRel(event, document.querySelector('.image_wrap .image_con'));
