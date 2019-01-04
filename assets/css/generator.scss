@@ -58,6 +58,13 @@ $darker_grey: #333;
 
 html {
     margin: 0;
+    font-size: 93.75%;
+    @include media-breakpoint-down(sm) {
+        font-size: 87.5%;
+    }
+    @include media-breakpoint-down(xs) {
+        font-size: 81.4%;
+    }
 }
 
 body {
@@ -66,7 +73,6 @@ body {
     line-height: 164%;
     color: $darker_grey;
     background-color: #eee;
-    font-size: 93.75%;
     margin: 0;
     margin: 0 auto;
 }
@@ -480,18 +486,33 @@ input[type="number"]:invalid {
 
 .edit_panel .edit_tools label {
     margin: 0 .25rem;
+    @include media-breakpoint-down(xs) {
+        display: block;
+        margin: .25rem 0;
+    }
 }
 
 .edit_panel .edit_tools label:first-of-type {
     margin-left: 0;
+    @include media-breakpoint-down(xs) {
+        margin-top: 0;
+    }
 }
 
 .edit_panel .edit_tools label:last-of-type {
     margin-right: 0;
+    @include media-breakpoint-down(xs) {
+        margin-bottom: 0;
+    }
+}
+
+.edit_panel .edit_tools .pin_index {
+    width: 4em;
 }
 
 .edit_panel .pin_text {
     min-height: 5rem;
+    height: 8rem;
     width: 100%;
     resize: vertical;
 }
