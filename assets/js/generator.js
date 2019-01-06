@@ -162,7 +162,11 @@
         img.src = document.querySelector('.image_wrap .image_con img').src;
 
         // from clickimage.js
-        clickimagePins(img); //eslint-disable-line
+        try {
+            clickimagePins(img); //eslint-disable-line
+        } catch(e) {
+            // ignore
+        }
 
         document.querySelector('.page').classList.add('demo');
     }
