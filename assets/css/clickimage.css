@@ -429,6 +429,14 @@ div.clickimage .pininfo h3 .highlight {
 
 /* Manual Fixes */
 
+.clickimage {
+    line-height: 0;
+}
+
+.clickimage>* {
+    line-height: 164%;
+}
+
 .imagebox {
     display: inline-block;
 }
