@@ -509,9 +509,13 @@
         if(includeSrc) img.src = document.querySelector('.general_edit .image_src').value;
         img.dataset.pins = getDataPinString();
 
-        return DEFAULT_CLICKIMAGE_SOURCE
-            .replace("<!--img-->", img.outerHTML)
-            .replace("<!--pins-->", getPinInfoString());
+        var source =
+            (document.querySelector('.general_edit .image_invert_colors').checked ?
+                DEFAULT_CLICKIMAGE_SOURCE_INVERTED : DEFAULT_CLICKIMAGE_SOURCE)
+                .replace("<!--img-->", img.outerHTML)
+                .replace("<!--pins-->", getPinInfoString());
+
+        return source;
     }
 
     function getDataPinString() {
@@ -639,6 +643,16 @@
         + '</div >';
 
     var DEFAULT_CLICKIMAGE_SOURCE =
+        '<div class="clickimage">\r\n'
+        + '    <div class="imagebox">\r\n'
+        + '        <!--img-->\r\n'
+        + '    </div>\r\n'
+        + '    <div class="pininfo">\r\n'
+        + '        <!--pins-->'
+        + '    </div>\r\n'
+        + '</div>\r\n';
+
+    var DEFAULT_CLICKIMAGE_SOURCE_INVERTED =
         '<div class="clickimage">\r\n'
         + '    <div class="imagebox invert">\r\n'
         + '        <!--img-->\r\n'

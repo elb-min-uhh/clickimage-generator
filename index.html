@@ -74,24 +74,35 @@
                 <button class="show_demo">Demo</button>
             </div>
 
-            <div class="general_edit">
-                <div class="heading_2">Configuration</div>
-                <div>
-                    <b>Image <em>src</em> value:</b> <input class="image_src" type="text" placeholder="Enter local image src value..."/><br>
-                    <small>
-                        You can enter your local <em>src</em> value here so it is inserted in the source output.
-                        This is necessary to generate working source code. <br>
-                        Otherwise your local file will not be found when adding the source code to your Html.
-                    </small>
-                </div>
-                <label></label>
-            </div>
-
             <div class="edit_con">
                 <div class="heading_2">Edit Pin</div>
                 <div class="edit_panels">
                         <!-- will be filled on pin creation -->
                 </div>
+            </div>
+
+            <div class="general_edit">
+                <div class="heading_2">Configuration</div>
+                <div>
+                    <div>
+                        <label>
+                            <b>Image <em>src</em> value:</b>
+                            <input class="image_src" type="text" placeholder="Enter local image src value..."/><br>
+                        </label>
+                        <small>
+                            You can enter your local <em>src</em> value here so it is inserted in the source output.
+                            This is necessary to generate working source code. <br>
+                            Otherwise your local file will not be found when adding the source code to your Html.
+                        </small>
+                    </div>
+
+                    <div>
+                        <label>
+                            <input class="image_invert_colors" type="checkbox" checked/><b> Invert pin colors</b>
+                        </label>
+                    </div>
+                </div>
+                <label></label>
             </div>
 
             <div class="source_con">
