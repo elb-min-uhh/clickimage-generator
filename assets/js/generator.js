@@ -559,8 +559,13 @@
         removeAllPins();
 
         try {
-            createPinsFromString(con.querySelector('img').dataset.pins);
+            var img = con.querySelector('img');
+            createPinsFromString(img.dataset.pins);
             loadPinInfos(con.querySelector('.pininfo').children);
+            // get actual src string, without any domain addition (like img.src)
+            document.querySelector('.general_edit .image_src').value = img.getAttribute("src");
+            document.querySelector('.general_edit .image_invert_colors').checked =
+                con.querySelector('.imagebox').classList.contains('invert');
         } catch(e) {
             //TODO display some error
         }
@@ -590,6 +595,7 @@
             var leadingWhitepace = html.match(/^\s+/)[0].replace(/(\r?\n)*/, "");
             // remove leading whitespace after linebreak
             html = html.replace(new RegExp("(\\r?\\n) {1," + leadingWhitepace.length + "}", "g"), "$1").trim();
+            editPanel.querySelector('.pin_inline').checked = infos[i].classList.contains('inline');
             editPanel.querySelector('.pin_text').value = html;
         }
     }
@@ -634,8 +640,12 @@
         var editPanels = document.querySelectorAll('.edit_con > .edit_panels > .edit_panel');
         for(var i = 0; i < editPanels.length; i++) {
             var code = editPanels[i].querySelector('.pin_text').value.replace(/(\r?\n)/g, '$1            ');
+            var divCode = '<div>';
+            if(editPanels[i].querySelector('.pin_inline').checked) divCode = '<div class="inline">';
+
             if(i > 0) string += '        ';
-            string += '<div>\r\n';
+            string += divCode;
+            string += '\r\n';
             string += '            ' + code + '\r\n';
             string += '        ' + '</div>\r\n';
         }
@@ -713,26 +723,31 @@
     var DEFAULT_EDIT_PANEL =
         '<div class="edit_panel">'
         + '<div class="edit_tools">'
-        + '    <label>'
-        + '        Orientation:'
-        + '        <select class="pin_orientation">'
-        + '            <option value="top">Up</option>'
-        + '            <option value="bottom">Down</option>'
-        + '            <option value="left">Left</option>'
-        + '            <option value="right">Right</option>'
-        + '        </select>'
-        + '    </label>'
-        + '    <label>'
-        + '        Index:'
-        + '        <input type="number" class="pin_index" step="1" />'
-        + '        <button class="pin_update_index">Update</button>'
-        + '    </label>'
-        + '    <label>'
-        + '        <button class="pin_move">Move</button>'
-        + '    </label>'
-        + '    <label>'
-        + '        <button class="pin_remove">Remove</button>'
-        + '    </label>'
+        + '    <div class="row">'
+        + '        <label>'
+        + '            Orientation:'
+        + '            <select class="pin_orientation">'
+        + '                <option value="top">Up</option>'
+        + '                <option value="bottom">Down</option>'
+        + '                <option value="left">Left</option>'
+        + '                <option value="right">Right</option>'
+        + '            </select>'
+        + '        </label>'
+        + '        <label>'
+        + '            Index:'
+        + '            <input type="number" class="pin_index" step="1" />'
+        + '            <button class="pin_update_index">Update</button>'
+        + '        </label>'
+        + '        <label>'
+        + '            <button class="pin_move">Move</button>'
+        + '        </label>'
+        + '        <label>'
+        + '            <button class="pin_remove">Remove</button>'
+        + '        </label>'
+        + '    </div>'
+        + '    <div class="row">'
+        + '        <label><input class="pin_inline" type="checkbox" /> Inline Content'
+        + '    </div>'
         + '</div >'
         + '<textarea class="pin_text" placeholder="Enter HTML..."></textarea>'
         + '</div >';
