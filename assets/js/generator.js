@@ -364,7 +364,7 @@
      * @param {*} index the index to change it to
      */
     function updatePinIndex(pin, index) {
-        var currentIndex = pin.dataset.pinIndex ? parseInt(pin.dataset.pinIndex, 10) : Number.MAX_SAFE_INTEGER;
+        var currentIndex = pin.dataset.pinIndex ? parseInt(pin.dataset.pinIndex, 10) : Number.MAX_VALUE;
         if(currentIndex == index) return;
 
         // to place it after the given index when increasing the index
@@ -406,8 +406,8 @@
         var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
         var pinsArray = Array.prototype.slice.call(pins, 0);
         pinsArray.sort(function(a, b) {
-            return (a.dataset.pinIndex ? parseInt(a.dataset.pinIndex, 10) : Number.MAX_SAFE_INTEGER)
-                - (b.dataset.pinIndex ? parseInt(b.dataset.pinIndex, 10) : Number.MAX_SAFE_INTEGER);
+            return (a.dataset.pinIndex ? parseInt(a.dataset.pinIndex, 10) : Number.MAX_VALUE)
+                - (b.dataset.pinIndex ? parseInt(b.dataset.pinIndex, 10) : Number.MAX_VALUE);
         });
 
         // set new index
@@ -417,7 +417,7 @@
     }
 
     function getFirstUniqueIndex() {
-        for(var i = 1; i < Number.MAX_SAFE_INTEGER; i++) {
+        for(var i = 1; i < Number.MAX_VALUE; i++) {
             if(!document.querySelector('.image_wrap .image_con > .image_pin[data-pin-index="' + i + '"]')) {
                 return i;
             }
@@ -451,7 +451,7 @@
 
         var edit_panels = document.querySelector('.edit_panels');
         if(edit_panels.children.length === 0) edit_panels.parentElement.classList.add('active');
-        edit_panels.append(panel);
+        edit_panels.appendChild(panel);
     }
 
     function onPinIndexUpdate(pin, pinIndexInput) {
