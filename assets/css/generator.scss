@@ -77,16 +77,13 @@ body {
     margin: 0 auto;
 }
 
-body * {
-    font-family: "Open Sans", sans-serif;
-}
-
 button {
     cursor: pointer;
     background-color: $highlight;
     color: white;
     border: none;
     padding: .3rem .5rem;
+    font-family: "Open Sans", sans-serif;
 }
 
 button:hover {
@@ -126,6 +123,21 @@ input[type="number"]:invalid {
     @include media-breakpoint-down(xs) {
         padding: 1rem .5rem 5rem;
     }
+}
+
+.page.source .image_wrap,
+.page.demo .image_wrap,
+.page.source .edit_con,
+.page.demo .edit_con {
+    display: none;
+}
+
+.page.source .source_con {
+    display: block;
+}
+
+.page.demo .demo_con {
+    display: block;
 }
 
 .heading,
@@ -461,6 +473,20 @@ input[type="number"]:invalid {
     margin-top: 1rem;
 }
 
+.general_buttons .back {
+    display: none;
+}
+
+.page.source .general_buttons .back,
+.page.demo .general_buttons .back {
+    display: inline-block;
+}
+
+.page.source .general_buttons .pin_add,
+.page.demo .general_buttons .pin_add {
+    display: none;
+}
+
 /* Pin Edit */
 
 .edit_con {
@@ -515,4 +541,24 @@ input[type="number"]:invalid {
     height: 8rem;
     width: 100%;
     resize: vertical;
+}
+
+/* Source */
+
+.source_con {
+    display: none;
+    margin-top: 1rem;
+}
+
+.source_con .source {
+    min-height: 16rem;
+    width: 100%;
+    resize: vertical;
+}
+
+/* Demo */
+
+.demo_con {
+    display: none;
+    margin-top: 1rem;
 }

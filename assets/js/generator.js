@@ -111,11 +111,11 @@
     }
 
     function initPinButtonListeners() {
-        document.querySelector('.pin_add').addEventListener('click', onAddPin);
-
-        document.querySelector('.show_source').addEventListener('click', onShowSource);
-
-        document.querySelector('.show_demo').addEventListener('click', onShowDemo);
+        var generalButtons = document.querySelector('.general_buttons');
+        generalButtons.querySelector('.back').addEventListener('click', onBack);
+        generalButtons.querySelector('.pin_add').addEventListener('click', onAddPin);
+        generalButtons.querySelector('.show_source').addEventListener('click', onShowSource);
+        generalButtons.querySelector('.show_demo').addEventListener('click', onShowDemo);
 
         document.querySelector('.image_wrap').addEventListener('click', function(e) {
             if(this.classList.contains('image_displayed')) {
@@ -128,6 +128,16 @@
         });
     }
 
+    function resetPageState() {
+        var page = document.querySelector('.page');
+        page.classList.remove('source');
+        page.classList.remove('demo');
+    }
+
+    function onBack() {
+        resetPageState();
+    }
+
     function onAddPin(event) {
         event.stopPropagation();
         resetPinAddition();
@@ -137,11 +147,21 @@
     }
 
     function onShowSource() {
-        console.log("SOURCE");
+        resetPageState();
+
+        document.querySelector('.source_con > .source').value = getClickimageSource();
+        document.querySelector('.page').classList.add('source');
     }
 
     function onShowDemo() {
-        console.log("DEMO");
+        resetPageState();
+        var demoCon = document.querySelector('.demo_con');
+
+        demoCon.innerHTML = getClickimageSource();
+        demoCon.querySelector('img').src = document.querySelector('.image_wrap .image_con img').src;
+        initializeClickimages(); //eslint-disable-line
+
+        document.querySelector('.page').classList.add('demo');
     }
 
     function onImageClick(event) {
@@ -372,6 +392,50 @@
         }
     }
 
+    // clickimage.js source
+
+    function getClickimageSource() {
+        var img = document.createElement('img');
+        img.dataset.pins = getDataPinString();
+
+        return DEFAULT_CLICKIMAGE_SOURCE
+            .replace("<!--img-->", img.outerHTML)
+            .replace("<!--pins-->", getPinInfoString());
+    }
+
+    function getDataPinString() {
+        var string = "";
+
+        var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
+        for(var i = 0; i < pins.length; i++) {
+            if(i > 0) string += "; ";
+            string += pins[i].style.left.replace(/%/, '');
+            string += ", ";
+            string += pins[i].style.top.replace(/%/, '');
+
+            if(pins[i].classList.contains('top')) string += ", 'top'";
+            else if(pins[i].classList.contains('left')) string += ", 'left'";
+            else if(pins[i].classList.contains('right')) string += ", 'right'";
+        }
+
+        return string;
+    }
+
+    function getPinInfoString() {
+        var string = "";
+
+        var editPanels = document.querySelectorAll('.edit_con > .edit_panels > .edit_panel');
+        for(var i = 0; i < editPanels.length; i++) {
+            var code = editPanels[i].querySelector('.pin_text').value.replace(/(\r?\n)/g, '$1            ');
+            if(i > 0) string += '        ';
+            string += '<div>\r\n';
+            string += '            ' + code + '\r\n';
+            string += '        ' + '</div>\r\n';
+        }
+
+        return string;
+    }
+
     // Helpers
 
     function dragDropSupported() {
@@ -435,5 +499,15 @@
         + '</div >'
         + '<textarea class="pin_text" placeholder="Enter HTML..."></textarea>'
         + '</div >';
+
+    var DEFAULT_CLICKIMAGE_SOURCE =
+        '<div class="clickimage">\r\n'
+        + '    <div class="imagebox invert">\r\n'
+        + '        <!--img-->\r\n'
+        + '    </div>\r\n'
+        + '    <div class="pininfo">\r\n'
+        + '        <!--pins-->'
+        + '    </div>\r\n'
+        + '</div>\r\n';
 
 })();
