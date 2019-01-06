@@ -128,7 +128,9 @@ input[type="number"]:invalid {
 .page.source .image_wrap,
 .page.demo .image_wrap,
 .page.source .edit_con,
-.page.demo .edit_con {
+.page.demo .edit_con,
+.page.source .general_edit,
+.page.demo .general_edit {
     display: none;
 }
 
@@ -485,6 +487,13 @@ input[type="number"]:invalid {
 .page.source .general_buttons .pin_add,
 .page.demo .general_buttons .pin_add {
     display: none;
+}
+
+/* General Edit */
+
+.general_edit .image_src {
+    width: 24em;
+    max-width: 100%;
 }
 
 /* Pin Edit */

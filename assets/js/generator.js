@@ -149,17 +149,20 @@
     function onShowSource() {
         resetPageState();
 
-        document.querySelector('.source_con > .source').value = getClickimageSource();
+        document.querySelector('.source_con > .source').value = getClickimageSource(true);
         document.querySelector('.page').classList.add('source');
     }
 
     function onShowDemo() {
         resetPageState();
         var demoCon = document.querySelector('.demo_con');
-
         demoCon.innerHTML = getClickimageSource();
-        demoCon.querySelector('img').src = document.querySelector('.image_wrap .image_con img').src;
-        initializeClickimages(); //eslint-disable-line
+
+        var img = demoCon.querySelector('img');
+        img.src = document.querySelector('.image_wrap .image_con img').src;
+
+        // from clickimage.js
+        clickimagePins(img); //eslint-disable-line
 
         document.querySelector('.page').classList.add('demo');
     }
@@ -394,8 +397,9 @@
 
     // clickimage.js source
 
-    function getClickimageSource() {
+    function getClickimageSource(includeSrc) {
         var img = document.createElement('img');
+        if(includeSrc) img.src = document.querySelector('.general_edit .image_src').value;
         img.dataset.pins = getDataPinString();
 
         return DEFAULT_CLICKIMAGE_SOURCE
