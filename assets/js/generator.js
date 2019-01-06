@@ -104,6 +104,7 @@
 
             imageBox.parentElement.querySelector('.image_con').appendChild(img);
             imageBox.parentElement.classList.add("image_displayed");
+            document.querySelector('.general_buttons').classList.add('active');
         };
         reader.readAsDataURL(file);
     }

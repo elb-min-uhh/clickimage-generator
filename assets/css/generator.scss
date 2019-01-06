@@ -475,7 +475,12 @@ input[type="number"]:invalid {
 /* Buttons */
 
 .general_buttons {
+    display: none;
     margin-top: 1rem;
+}
+
+.general_buttons.active {
+    display: block;
 }
 
 .general_buttons .back {
