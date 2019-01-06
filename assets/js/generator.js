@@ -7,6 +7,9 @@
     var advancedLoad = false;
     var nextPinId = 0;
 
+    var isMoving = false;
+    var movingPin;
+
     window.addEventListener('load', function() {
         if(dragDropSupported() && fileReaderSupported()) advancedLoad = true;
 
@@ -117,11 +120,16 @@
         generalButtons.querySelector('.show_source').addEventListener('click', onShowSource);
         generalButtons.querySelector('.show_demo').addEventListener('click', onShowDemo);
 
-        document.querySelector('.image_wrap').addEventListener('click', function(e) {
-            if(this.classList.contains('image_displayed')) {
-                onImageClick(e);
-            }
-        });
+        var imageWrap = document.querySelector('.image_wrap');
+
+        imageWrap.addEventListener('click', onImageClick);
+        imageWrap.addEventListener('mousedown', onImageMouseDown);
+        imageWrap.addEventListener('mousemove', onImageMouseMove);
+        imageWrap.addEventListener('mouseup', onImageMouseUp);
+        imageWrap.addEventListener('touchstart', onImageMouseDown);
+        imageWrap.addEventListener('touchmove', onImageMouseMove);
+        imageWrap.addEventListener('touchend', onImageMouseUp);
+        imageWrap.addEventListener('touchcancel', onImageMouseUp);
 
         document.addEventListener('click', function() {
             resetPinAddition();
@@ -173,8 +181,7 @@
 
     function onImageClick(event) {
         var imageWrap = document.querySelector('.image_wrap');
-
-        event.stopPropagation();
+        if(!imageWrap.classList.contains('image_displayed')) return;
 
         if(imageWrap.classList.contains('positioning')) {
             var posRel = getPositionRel(event, document.querySelector('.image_wrap .image_con'));
@@ -182,7 +189,74 @@
             if(posRel.x >= 0 && posRel.x <= 1
                 && posRel.y >= 0 && posRel.y <= 1) {
                 placePinSelection(posRel);
+                event.stopPropagation();
             }
+        }
+
+        if(imageWrap.classList.contains('moving')) {
+            // ignore moving click events, mouse/touch events do everything
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }
+
+    function onImageMouseDown(event) {
+        var imageWrap = document.querySelector('.image_wrap');
+        if(!imageWrap.classList.contains('image_displayed')) return;
+
+        if(imageWrap.classList.contains('moving')) {
+            if(event.type === "touchstart") {
+                touchHandler(event);
+                return;
+            }
+
+            isMoving = true;
+            var position = getPositionRel(event, document.querySelector('.image_wrap .image_con'));
+            movePin(movingPin, position);
+
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }
+
+    function onImageMouseMove(event) {
+        var imageWrap = document.querySelector('.image_wrap');
+        if(!imageWrap.classList.contains('image_displayed')) return;
+
+        if(imageWrap.classList.contains('moving')
+            && isMoving) {
+            if(event.type === "touchmove") {
+                touchHandler(event);
+                return;
+            }
+
+            var position = getPositionRel(event, document.querySelector('.image_wrap .image_con'));
+            movePin(movingPin, position);
+
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }
+
+    function onImageMouseUp(event) {
+        var imageWrap = document.querySelector('.image_wrap');
+        if(!imageWrap.classList.contains('image_displayed')) return;
+
+        if(imageWrap.classList.contains('moving')
+            && isMoving) {
+            if(event.type === "touchend"
+                || event.type === "touchcancel") {
+                touchHandler(event);
+                return;
+            }
+
+            isMoving = false;
+            movingPin = null;
+
+            resetPinAddition();
+
+            event.stopPropagation();
+            event.preventDefault();
         }
     }
 
@@ -236,8 +310,7 @@
         textElement.innerText = text;
         pin.appendChild(textElement);
 
-        pin.style.left = (position.x * 100) + "%";
-        pin.style.top = (position.y * 100) + "%";
+        movePin(pin, position);
 
         return pin;
     }
@@ -258,6 +331,19 @@
 
         addPinEditPanel(pin);
         selectPin(pin);
+    }
+
+    /**
+     * Moves a pin to the given position.
+     * @param {*} pin
+     * @param {*} position
+     */
+    function movePin(pin, position) {
+        if(position.x >= 0 && position.x <= 1
+            && position.y >= 0 && position.y <= 1) {
+            pin.style.left = (position.x * 100) + "%";
+            pin.style.top = (position.y * 100) + "%";
+        }
     }
 
     /**
@@ -356,20 +442,36 @@
         pinOrientationSelect.addEventListener('change', function() {
             setPinOrientation(pin, pinOrientationSelect.value);
         });
-
         panel.querySelector('.pin_update_index').addEventListener('click', function() {
-            try {
-                var index = parseInt(pinIndexInput.value, 10);
-                updatePinIndex(pin, index);
-                pinIndexInput.value = pin.dataset.pinIndex;
-            } catch(e) {
-                // do nothing
-            }
+            onPinIndexUpdate(pin, pinIndexInput);
+        });
+        panel.querySelector('.pin_move').addEventListener('click', function(e) {
+            onPinMove(e, pin);
         });
 
         var edit_panels = document.querySelector('.edit_panels');
         if(edit_panels.children.length === 0) edit_panels.parentElement.classList.add('active');
         edit_panels.append(panel);
+    }
+
+    function onPinIndexUpdate(pin, pinIndexInput) {
+        try {
+            var index = parseInt(pinIndexInput.value, 10);
+            updatePinIndex(pin, index);
+            pinIndexInput.value = pin.dataset.pinIndex;
+        } catch(e) {
+            // do nothing
+        }
+    }
+
+    function onPinMove(event, pin) {
+        event.stopPropagation();
+        resetPinAddition();
+
+        var imageWrap = document.querySelector('.image_wrap');
+        imageWrap.classList.add("moving");
+
+        movingPin = pin;
     }
 
     function setPinOrientation(pin, orientation) {
@@ -392,6 +494,7 @@
         var imageWrap = document.querySelector('.image_wrap');
         imageWrap.classList.remove("positioning");
         imageWrap.classList.remove("selecting");
+        imageWrap.classList.remove("moving");
 
         var pinSelections = document.querySelectorAll('.pin_selection');
         for(var i = 0; i < pinSelections.length; i++) {
@@ -480,6 +583,33 @@
         for(var i = 0; i < elements.length; i++) {
             elements[i].classList.remove(clazz);
         }
+    }
+
+    function touchHandler(event) {
+        var touches = event.changedTouches,
+            first = touches[0],
+            type = "";
+        switch(event.type) {
+            case "touchstart": type = "mousedown"; break;
+            case "touchmove": type = "mousemove"; break;
+            case "touchend": type = "mouseup"; break;
+            default: return;
+        }
+
+        // initMouseEvent(type, canBubble, cancelable, view, clickCount,
+        //                screenX, screenY, clientX, clientY, ctrlKey,
+        //                altKey, shiftKey, metaKey, button, relatedTarget);
+
+        var simulatedEvent = document.createEvent("MouseEvent");
+
+        simulatedEvent.initMouseEvent(type, true, true, window, 1,
+            first.screenX, first.screenY,
+            first.clientX, first.clientY, false,
+            false, false, false, 0/*left*/, null);
+
+        first.target.dispatchEvent(simulatedEvent);
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     // const elements

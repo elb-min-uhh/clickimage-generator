@@ -225,8 +225,9 @@ input[type="number"]:invalid {
     }
 }
 
-.image_wrap.positioning {
-    border: .25rem solid red;
+.image_wrap.positioning,
+.image_wrap.selecting,
+.image_wrap.moving {
     padding: .75rem;
     @include media-breakpoint-down(lg) {
         padding: .5rem;
@@ -236,15 +237,16 @@ input[type="number"]:invalid {
     }
 }
 
+.image_wrap.positioning {
+    border: .25rem solid red;
+}
+
 .image_wrap.selecting {
     border: .25rem solid blue;
-    padding: .75rem;
-    @include media-breakpoint-down(lg) {
-        padding: .5rem;
-    }
-    @include media-breakpoint-down(sm) {
-        padding: .25rem;
-    }
+}
+
+.image_wrap.moving {
+    border: .25rem solid yellow;
 }
 
 .image_wrap.image_displayed {
@@ -261,7 +263,8 @@ input[type="number"]:invalid {
     display: inline-block;
 }
 
-.image_wrap.positioning .image_con {
+.image_wrap.positioning .image_con,
+.image_wrap.moving .image_con {
     cursor: crosshair;
 }
 
