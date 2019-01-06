@@ -14,7 +14,8 @@
         if(dragDropSupported() && fileReaderSupported()) advancedLoad = true;
 
         initImageLoading();
-        initPins();
+        initMain();
+        initSourceTab();
     });
 
     // Image Loading
@@ -109,7 +110,7 @@
 
     // Add and Edit Pins
 
-    function initPins() {
+    function initMain() {
         initPinButtonListeners();
     }
 
@@ -285,9 +286,6 @@
         pins.push(createPin(position, "bottom", id, "?"));
 
         for(var i = 0; i < pins.length; i++) {
-            pins[i].addEventListener('click', function() {
-                onPinSelected(this);
-            });
             pinSelection.appendChild(pins[i]);
         }
 
@@ -311,6 +309,10 @@
         pin.appendChild(textElement);
 
         movePin(pin, position);
+
+        pin.addEventListener('click', function() {
+            onPinSelected(this);
+        });
 
         return pin;
     }
@@ -359,6 +361,31 @@
     }
 
     /**
+     * Removes a pin and his edit panel
+     * @param {*} pin
+     */
+    function removePin(pin) {
+        var editPanel = document.getElementById(pin.id.replace("pin_", "pin_edit_"));
+        editPanel.parentElement.removeChild(editPanel);
+        pin.parentElement.removeChild(pin);
+        rearrangePinIndices();
+
+        if(!document.querySelector('.image_wrap .image_con > .image_pin')) {
+            document.querySelector('.edit_con').classList.remove('active');
+        }
+    }
+
+    /**
+     * Removes all created pins.
+     */
+    function removeAllPins() {
+        var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
+        for(var i = 0; i < pins.length; i++) {
+            removePin(pins[i]);
+        }
+    }
+
+    /**
      * Update the index of a pin. Will rearrange other pins on collision.
      * @param {*} pin the dom element of the .image_pin to change the index of
      * @param {*} index the index to change it to
@@ -396,6 +423,9 @@
     function setPinIndex(pin, index) {
         pin.dataset.pinIndex = index;
         pin.querySelector('.pin_text').innerText = index;
+
+        var editPanel = document.getElementById(pin.id.replace("pin_", "pin_edit_"));
+        if(editPanel) editPanel.querySelector('.pin_index').value = index;
     }
 
     /**
@@ -448,6 +478,9 @@
         panel.querySelector('.pin_move').addEventListener('click', function(e) {
             onPinMove(e, pin);
         });
+        panel.querySelector('.pin_remove').addEventListener('click', function(e) {
+            onPinRemove(e, pin);
+        });
 
         var edit_panels = document.querySelector('.edit_panels');
         if(edit_panels.children.length === 0) edit_panels.parentElement.classList.add('active');
@@ -472,6 +505,11 @@
         imageWrap.classList.add("moving");
 
         movingPin = pin;
+    }
+
+    function onPinRemove(event, pin) {
+        event.stopPropagation();
+        removePin(pin);
     }
 
     function setPinOrientation(pin, orientation) {
@@ -502,7 +540,61 @@
         }
     }
 
-    // clickimage.js source
+    // source tab
+
+    function initSourceTab() {
+        initSourceListeners();
+    }
+
+    function initSourceListeners() {
+        document.querySelector('.source_con .load').addEventListener('click', onSourceLoad);
+    }
+
+    function onSourceLoad() {
+        var con = document.createElement('div');
+        con.innerHTML = document.querySelector('.source_con .source').value;
+
+        // reset pins
+        resetPinAddition();
+        removeAllPins();
+
+        try {
+            createPinsFromString(con.querySelector('img').dataset.pins);
+            loadPinInfos(con.querySelector('.pininfo').children);
+        } catch(e) {
+            //TODO display some error
+        }
+
+        resetPageState();
+    }
+
+    function createPinsFromString(data) {
+        var coords = parsePinCoordinates(data); //eslint-disable-line
+
+        for(var i = 0; i < coords.length; i++) {
+            var position = { x: parseFloat(coords[i][0]) / 100, y: parseFloat(coords[i][1]) / 100 };
+            var orientation = "bottom";
+            if(coords[i].length >= 3) orientation = coords[i][2];
+
+            var pin = createPin(position, orientation, nextPinId++, i + 1);
+            placePin(pin);
+        }
+    }
+
+    function loadPinInfos(infos) {
+        var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
+        for(var i = 0; i < infos.length; i++) {
+            var pin = pins[i];
+            var editPanel = document.getElementById(pin.id.replace("pin_", "pin_edit_"));
+            var html = infos[i].innerHTML;
+            var leadingWhitepace = html.match(/^\s+/)[0].replace(/(\r?\n)*/, "");
+            // remove leading whitespace after linebreak
+            html = html.replace(new RegExp("(\\r?\\n) {1," + leadingWhitepace.length + "}", "g"), "$1").trim();
+            editPanel.querySelector('.pin_text').value = html;
+        }
+    }
+
+    // clickimage.js source functions
 
     function getClickimageSource(includeSrc) {
         var img = document.createElement('img');
@@ -637,6 +729,9 @@
         + '    </label>'
         + '    <label>'
         + '        <button class="pin_move">Move</button>'
+        + '    </label>'
+        + '    <label>'
+        + '        <button class="pin_remove">Remove</button>'
         + '    </label>'
         + '</div >'
         + '<textarea class="pin_text" placeholder="Enter HTML..."></textarea>'
