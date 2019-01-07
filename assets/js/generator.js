@@ -644,11 +644,11 @@
             var divCode = '<div>';
             if(editPanels[i].querySelector('.pin_inline').checked) divCode = '<div class="inline">';
 
-            if(i > 0) string += '        ';
+            if(i > 0) string += '\r\n        ';
             string += divCode;
             string += '\r\n';
             string += '            ' + code + '\r\n';
-            string += '        ' + '</div>\r\n';
+            string += '        ' + '</div>';
         }
 
         return string;
@@ -759,7 +759,7 @@
         + '        <!--img-->\r\n'
         + '    </div>\r\n'
         + '    <div class="pininfo">\r\n'
-        + '        <!--pins-->'
+        + '        <!--pins-->\r\n'
         + '    </div>\r\n'
         + '</div>\r\n';
 
@@ -769,7 +769,7 @@
         + '        <!--img-->\r\n'
         + '    </div>\r\n'
         + '    <div class="pininfo">\r\n'
-        + '        <!--pins-->'
+        + '        <!--pins-->\r\n'
         + '    </div>\r\n'
         + '</div>\r\n';
 
