@@ -561,7 +561,14 @@
 
         try {
             var img = con.querySelector('img');
-            createPinsFromString(img.dataset.pins);
+
+            var coords = [];
+            // from data-pins (clickimage.js parsing method)
+            if(img.dataset.pins != undefined) coords = parsePinCoordinates(img.dataset.pins); //eslint-disable-line
+            // from onload (own method)
+            else if(img.getAttribute('onload') != undefined) coords = parsePinCoordinatesFromOnLoad(img);
+
+            createPinsFromCoordinates(coords);
             loadPinInfos(con.querySelector('.pininfo').children);
             // get actual src string, without any domain addition (like img.src)
             document.querySelector('.general_edit .image_src').value = img.getAttribute("src");
@@ -574,9 +581,14 @@
         resetPageState();
     }
 
-    function createPinsFromString(data) {
-        var coords = parsePinCoordinates(data); //eslint-disable-line
+    function parsePinCoordinatesFromOnLoad(img) {
+        var code = img.getAttribute('onload');
+        var coordsString = code.match(/clickimagePins\([^,]+,\s*([^)]+)\)/)[1];
+        coordsString = coordsString.replace(/"/g, "\\\"").replace(/'/g, "\"");
+        return JSON.parse(coordsString);
+    }
 
+    function createPinsFromCoordinates(coords) {
         for(var i = 0; i < coords.length; i++) {
             var position = { x: parseFloat(coords[i][0]) / 100, y: parseFloat(coords[i][1]) / 100 };
             var orientation = "bottom";
