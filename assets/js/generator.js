@@ -24,6 +24,8 @@
      */
     var movingPin;
 
+    //-- global init
+
     /**
      * Onload listener, initiates the start up.
      */
@@ -954,7 +956,7 @@
         event.stopPropagation();
     }
 
-    // const elements
+    //-- const elements
 
     /**
      * Source code of the default edit panel, without any values set.
