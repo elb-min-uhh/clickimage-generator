@@ -36,7 +36,7 @@
         initSourceTab();
     });
 
-    // Image Loading
+    //-- Image Loading
 
     /**
      * Initializes all listeners and classes to enable the image loading.
@@ -156,7 +156,7 @@
         reader.readAsDataURL(file);
     }
 
-    // General Buttons
+    //-- General Buttons
 
     /**
      * Inits the general button listeners. These are visible on nearly every tab.
@@ -229,7 +229,7 @@
         page.classList.remove('demo');
     }
 
-    // Add and Edit Pins
+    //-- Add and Edit Pins
 
     /**
      * Inits the main generator functions and listeners. So all the listeners
@@ -698,7 +698,7 @@
         }
     }
 
-    // source tab
+    //-- source tab
 
     /**
      * Initializes functions on the `Source` tab.
@@ -859,7 +859,7 @@
         return string;
     }
 
-    // Helpers
+    //-- Helpers
 
     /**
      * Returns if the device supports drag and drop.
