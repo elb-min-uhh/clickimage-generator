@@ -25,7 +25,9 @@
         <div class="page">
             <div class="heading">Clickimage <b>Generator</b></div>
 
+            <!-- container for the image selection and the image display -->
             <div class="image_wrap">
+                <!-- only used for image selection and drag and drop -->
                 <div class="image_box">
                     <div class="box_input">
                         <input class="box_file" type="file" id="file" accept="image/*" />
@@ -35,9 +37,11 @@
                     <div class="box_info box_error many">Too many files. Only select one file.</div>
                     <div class="box_info box_error type">Unknown file type. Only select one image.</div>
                 </div>
+                <!-- used to display the actual image -->
                 <div class="image_con"></div>
             </div>
 
+            <!-- buttons nearly always visible-->
             <div class="general_buttons">
                 <button class="back">&lt; Back</button>
                 <button class="pin_add">Add</button>
@@ -45,6 +49,7 @@
                 <button class="show_demo">Demo</button>
             </div>
 
+            <!-- Edit container for pins. Only selected children will be visible -->
             <div class="edit_con">
                 <div class="heading_2">Edit Pin</div>
                 <div class="edit_panels">
@@ -52,6 +57,7 @@
                 </div>
             </div>
 
+            <!-- General edit container. Contains all general settings. -->
             <div class="general_edit">
                 <div class="heading_2">Configuration</div>
                 <div>
@@ -76,6 +82,7 @@
                 <label></label>
             </div>
 
+            <!-- Container to display the source code -->
             <div class="source_con">
                 <textarea class="source"></textarea>
                 <div class="source_buttons">
@@ -83,8 +90,10 @@
                 </div>
             </div>
 
+            <!-- Container to display the demo -->
             <div class="demo_con"></div>
 
+            <!-- footer -->
             <div class="footer">
                 <div class="wrap">
                     <div class="left">
