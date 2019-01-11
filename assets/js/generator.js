@@ -1,25 +1,46 @@
 /**
-* Scripts for the clickimage generator.
-*/
+ * Scripts for the clickimage generator.
+ */
 
+// in anonymous function because there is no public interface.
 (function() {
 
+    /**
+     * defines whether the device supports Drag 'n Drop functions
+     */
     var advancedLoad = false;
+    /**
+     * counter to set unique pin IDs. used for the actual dom element attribute `id`
+     */
     var nextPinId = 0;
 
+    /**
+     * will be set to true when the application is in "pin-moving" state, to change a pin position
+     */
     var isMoving = false;
+
+    /**
+     * the pin which will be moved
+     */
     var movingPin;
 
+    /**
+     * Onload listener, initiates the start up.
+     */
     window.addEventListener('load', function() {
         if(dragDropSupported() && fileReaderSupported()) advancedLoad = true;
 
         initImageLoading();
-        initMain();
+        initGeneralButtonListeners();
+        initMainTab();
         initSourceTab();
     });
 
     // Image Loading
 
+    /**
+     * Initializes all listeners and classes to enable the image loading.
+     */
     function initImageLoading() {
         var imageBox = document.querySelector('.image_box');
         var fileChooser = imageBox.querySelector('.box_file');
@@ -39,6 +60,11 @@
         });
     }
 
+    /**
+     * Inits the listeners necessary for image loading through drag n drop.
+     *
+     * @param {HTMLElement} imageBox the `.image_box` element.
+     */
     function initDragDropListeners(imageBox) {
         // prevent other listeners
         var events = ["drag", "dragstart", "dragend", "dragover", "dragenter", "dragleave", "drop"];
@@ -72,6 +98,12 @@
         });
     }
 
+    /**
+     * Hides all info boxes in the image container. These might have been displayed
+     * on error or as hint.
+     *
+     * @param {HTMLElement} imageBox the `.image_box` element.
+     */
     function resetInfos(imageBox) {
         var infos = imageBox.querySelectorAll('.box_info');
         for(var i = 0; i < infos.length; i++) {
@@ -79,6 +111,13 @@
         }
     }
 
+    /**
+     * Checks if the selected `files` contain only one valid image. Will display
+     * an error (`.box_info`) otherwise in the `.image_box`.
+     *
+     * @param {HTMLElement} imageBox the `.image_box` element.
+     * @param {File[]} files the selected files
+     */
     function checkFiles(imageBox, files) {
         // too much files
         if(files.length > 1) {
@@ -95,6 +134,14 @@
         }
     }
 
+    /**
+     * Loads the selected image `File` into the `.image_box`. Will hide all
+     * loading and drag and drop elements.
+     * Might throw an error on invalid files.
+     *
+     * @param {HTMLElement} imageBox the `.image_box` element.
+     * @param {File} files the selected files
+     */
     function loadImage(imageBox, file) {
         var reader = new FileReader();
         reader.onload = function() {
@@ -109,64 +156,55 @@
         reader.readAsDataURL(file);
     }
 
-    // Add and Edit Pins
+    // General Buttons
 
-    function initMain() {
-        initPinButtonListeners();
-    }
-
-    function initPinButtonListeners() {
+    /**
+     * Inits the general button listeners. These are visible on nearly every tab.
+     */
+    function initGeneralButtonListeners() {
         var generalButtons = document.querySelector('.general_buttons');
         generalButtons.querySelector('.back').addEventListener('click', onBack);
         generalButtons.querySelector('.pin_add').addEventListener('click', onAddPin);
         generalButtons.querySelector('.show_source').addEventListener('click', onShowSource);
         generalButtons.querySelector('.show_demo').addEventListener('click', onShowDemo);
-
-        var imageWrap = document.querySelector('.image_wrap');
-
-        imageWrap.addEventListener('click', onImageClick);
-        imageWrap.addEventListener('mousedown', onImageMouseDown);
-        imageWrap.addEventListener('mousemove', onImageMouseMove);
-        imageWrap.addEventListener('mouseup', onImageMouseUp);
-        imageWrap.addEventListener('touchstart', onImageMouseDown);
-        imageWrap.addEventListener('touchmove', onImageMouseMove);
-        imageWrap.addEventListener('touchend', onImageMouseUp);
-        imageWrap.addEventListener('touchcancel', onImageMouseUp);
-
-        document.addEventListener('click', function() {
-            resetPinAddition();
-        });
     }
 
-    function resetPageState() {
-        var page = document.querySelector('.page');
-        page.classList.remove('source');
-        page.classList.remove('demo');
-    }
-
+    /**
+     * Called when the `Back` button is clicked.
+     */
     function onBack() {
         resetPageState();
     }
 
+    /**
+     * Called when the `Add Pin` button is clicked.
+     * @param {Event} event
+     */
     function onAddPin(event) {
         event.stopPropagation();
-        resetPinAddition();
+        resetImageState();
 
         var imageWrap = document.querySelector('.image_wrap');
         imageWrap.classList.add("positioning");
     }
 
+    /**
+     * Called when the `Show Source` button is clicked.
+     */
     function onShowSource() {
         resetPageState();
 
-        document.querySelector('.source_con > .source').value = getClickimageSource(true);
+        document.querySelector('.source_con > .source').value = generateClickimageSource(true);
         document.querySelector('.page').classList.add('source');
     }
 
+    /**
+     * Called when the `Demo` button is clicked.
+     */
     function onShowDemo() {
         resetPageState();
         var demoCon = document.querySelector('.demo_con');
-        demoCon.innerHTML = getClickimageSource();
+        demoCon.innerHTML = generateClickimageSource();
 
         var img = demoCon.querySelector('img');
         img.src = document.querySelector('.image_wrap .image_con img').src;
@@ -181,6 +219,54 @@
         document.querySelector('.page').classList.add('demo');
     }
 
+    /**
+     * Resets the tab state. Will display the main page and hide the `Source` and
+     * `Demo` tab.
+     */
+    function resetPageState() {
+        var page = document.querySelector('.page');
+        page.classList.remove('source');
+        page.classList.remove('demo');
+    }
+
+    // Add and Edit Pins
+
+    /**
+     * Inits the main generator functions and listeners. So all the listeners
+     * necessary for the main page (after image loading) to work.
+     * Does not include specific `Source` or `Demo` functions besides the state change.
+     */
+    function initMainTab() {
+        initPinButtonListeners();
+    }
+
+    /**
+     * Inits tall the listeners necessary for the main page (after image loading)
+     * to work.
+     * Does not include specific `Source` or `Demo` functions besides the state change.
+     */
+    function initPinButtonListeners() {
+
+        var imageWrap = document.querySelector('.image_wrap');
+
+        imageWrap.addEventListener('click', onImageClick);
+        imageWrap.addEventListener('mousedown', onImageMouseDown);
+        imageWrap.addEventListener('mousemove', onImageMouseMove);
+        imageWrap.addEventListener('mouseup', onImageMouseUp);
+        imageWrap.addEventListener('touchstart', onImageMouseDown);
+        imageWrap.addEventListener('touchmove', onImageMouseMove);
+        imageWrap.addEventListener('touchend', onImageMouseUp);
+        imageWrap.addEventListener('touchcancel', onImageMouseUp);
+
+        document.addEventListener('click', function() {
+            resetImageState();
+        });
+    }
+
+    /**
+     * Called whenever the `.image_wrap` is clicked. Might be called before
+     * an image is loaded.
+     */
     function onImageClick(event) {
         var imageWrap = document.querySelector('.image_wrap');
         if(!imageWrap.classList.contains('image_displayed')) return;
@@ -202,6 +288,11 @@
         }
     }
 
+    /**
+     * Called on `mousedown` or `touchstart` on the `.image_wrap`
+     *
+     * @param {Event} event the event.
+     */
     function onImageMouseDown(event) {
         var imageWrap = document.querySelector('.image_wrap');
         if(!imageWrap.classList.contains('image_displayed')) return;
@@ -221,6 +312,11 @@
         }
     }
 
+    /**
+     * Called on `mousemove` or `touchmove` on the `.image_wrap`
+     *
+     * @param {Event} event the event.
+     */
     function onImageMouseMove(event) {
         var imageWrap = document.querySelector('.image_wrap');
         if(!imageWrap.classList.contains('image_displayed')) return;
@@ -240,6 +336,11 @@
         }
     }
 
+    /**
+     * Called on `mouseup`, `touchend` or `touchcancel` on the `.image_wrap`
+     *
+     * @param {Event} event the event.
+     */
     function onImageMouseUp(event) {
         var imageWrap = document.querySelector('.image_wrap');
         if(!imageWrap.classList.contains('image_displayed')) return;
@@ -255,13 +356,17 @@
             isMoving = false;
             movingPin = null;
 
-            resetPinAddition();
+            resetImageState();
 
             event.stopPropagation();
             event.preventDefault();
         }
     }
 
+    /**
+     * Called whenever a pin is selected, meaning clicked.
+     * @param {HTMLElement} pin the element clicked
+     */
     function onPinSelected(pin) {
         if(pin.classList.contains('selection_pin')) {
             placePin(pin);
@@ -271,6 +376,10 @@
         }
     }
 
+    /**
+     * Places a pin selection at the given relative image position.
+     * @param {Object: {x, y}} position
+     */
     function placePinSelection(position) {
         var imageWrap = document.querySelector('.image_wrap');
 
@@ -297,6 +406,14 @@
 
     }
 
+    /**
+     * Creates a pin at the given relative position.
+     *
+     * @param {Object: {x, y}} position
+     * @param {"top" | "bottom" | "left" | "right"} orientation
+     * @param {Integer} id unique id of the element. Not the displayed pin index!
+     * @param {String} text text to display on the pin. (Usually the Index)
+     */
     function createPin(position, orientation, id, text) {
         var pin = document.createElement("div");
         pin.classList.add("image_pin");
@@ -330,7 +447,7 @@
         setPinIndex(pin, getFirstUniqueIndex());
 
         imageCon.appendChild(pin);
-        resetPinAddition();
+        resetImageState();
 
         addPinEditPanel(pin);
         selectPin(pin);
@@ -447,6 +564,10 @@
         }
     }
 
+    /**
+     * Calculate the first unique pin index counting from 1.
+     * e.g. given the currently set pins [1, 2, 4, 5] it would be 3.
+     */
     function getFirstUniqueIndex() {
         for(var i = 1; i < Number.MAX_VALUE; i++) {
             if(!document.querySelector('.image_wrap .image_con > .image_pin[data-pin-index="' + i + '"]')) {
@@ -455,6 +576,10 @@
         }
     }
 
+    /**
+     * Creates an edit panel for a given `pin` and appends it to the dom.
+     * @param {HTMLElement} pin
+     */
     function addPinEditPanel(pin) {
         var con = document.createElement('div');
         con.innerHTML = DEFAULT_EDIT_PANEL;
@@ -488,6 +613,12 @@
         edit_panels.appendChild(panel);
     }
 
+    /**
+     * Called whenever the `Update` button is clicked to manually update the
+     * pin index.
+     * @param {HTMLElement} pin the pin to update
+     * @param {HTMLElement} pinIndexInput the input containing the index to update to
+     */
     function onPinIndexUpdate(pin, pinIndexInput) {
         try {
             var index = parseInt(pinIndexInput.value, 10);
@@ -498,9 +629,15 @@
         }
     }
 
+    /**
+     * Called whenever the `Move` button is clicked to change the pin position.
+     * Will change the image state to moving so a click changes the pin position.
+     * @param {Event} event the mousedown/touchstart/mousemove/touchmove event.
+     * @param {HTMLElement} pin the selected pin
+     */
     function onPinMove(event, pin) {
         event.stopPropagation();
-        resetPinAddition();
+        resetImageState();
 
         var imageWrap = document.querySelector('.image_wrap');
         imageWrap.classList.add("moving");
@@ -508,11 +645,21 @@
         movingPin = pin;
     }
 
+    /**
+     * Called whenever the `Remove` button is clicked.
+     * @param {Event} event
+     * @param {HTMLElement} pin
+     */
     function onPinRemove(event, pin) {
         event.stopPropagation();
         removePin(pin);
     }
 
+    /**
+     * Change the displayed pin orientation to the given value.
+     * @param {HTMLElement} pin
+     * @param {"top" | "bottom" | "left" | "right"} orientation
+     */
     function setPinOrientation(pin, orientation) {
         pin.classList.remove("bottom");
         pin.classList.remove("top");
@@ -521,6 +668,11 @@
         pin.classList.add(orientation);
     }
 
+    /**
+     * Returns the pin's orientation. If the pin has multiple orientation
+     * classes the output is not defined and will be one of those.
+     * @param {HTMLElement} pin
+     */
     function getPinOrientation(pin) {
         var orientation = "bottom";
         if(pin.classList.contains("top")) orientation = "top";
@@ -529,7 +681,12 @@
         return orientation;
     }
 
-    function resetPinAddition() {
+    /**
+     * Will reset the image edit state. Removing all editing states like
+     * `positioning`, `selecting`, `moving` and removing all `.pin_selection`
+     * elements.
+     */
+    function resetImageState() {
         var imageWrap = document.querySelector('.image_wrap');
         imageWrap.classList.remove("positioning");
         imageWrap.classList.remove("selecting");
@@ -543,20 +700,29 @@
 
     // source tab
 
+    /**
+     * Initializes functions on the `Source` tab.
+     */
     function initSourceTab() {
         initSourceListeners();
     }
 
+    /**
+     * Initializes listeners on the `Source` tab.
+     */
     function initSourceListeners() {
         document.querySelector('.source_con .load').addEventListener('click', onSourceLoad);
     }
 
+    /**
+     * Called whenever the `Import Changes` button on the source tab is clicked.
+     */
     function onSourceLoad() {
         var con = document.createElement('div');
         con.innerHTML = document.querySelector('.source_con .source').value;
 
         // reset pins
-        resetPinAddition();
+        resetImageState();
         removeAllPins();
 
         try {
@@ -581,6 +747,12 @@
         resetPageState();
     }
 
+    /**
+     * Parses the pin coordinates from the source import.
+     *
+     * @param {HTMLElement} img the temporary import element created from the
+     * importing source code.
+     */
     function parsePinCoordinatesFromOnLoad(img) {
         var code = img.getAttribute('onload');
         var coordsString = code.match(/clickimagePins\([^,]+,\s*([^)]+)\)/)[1];
@@ -588,6 +760,12 @@
         return JSON.parse(coordsString);
     }
 
+    /**
+     * Create the image pins from the parsed coordinates. The coordinates
+     * are given in their clickimage.js internal representation.
+     *
+     * @param {Array<Array: [x, y<, orientation>]>} coords
+     */
     function createPinsFromCoordinates(coords) {
         for(var i = 0; i < coords.length; i++) {
             var position = { x: parseFloat(coords[i][0]) / 100, y: parseFloat(coords[i][1]) / 100 };
@@ -599,6 +777,10 @@
         }
     }
 
+    /**
+     * Load the HTML contents of the `.pininfo` children into the edit panel.
+     * @param {*} infos the clickimage.js `.pininfo` children.
+     */
     function loadPinInfos(infos) {
         var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
         for(var i = 0; i < infos.length; i++) {
@@ -615,10 +797,15 @@
 
     // clickimage.js source functions
 
-    function getClickimageSource(includeSrc) {
+    /**
+     * Generates the clickimage.js HTML source code from the current state.
+     *
+     * @param {Boolean} includeSrc whether to set a `src` attribute on the `img` or not.
+     */
+    function generateClickimageSource(includeSrc) {
         var img = document.createElement('img');
         if(includeSrc) img.src = document.querySelector('.general_edit .image_src').value;
-        img.dataset.pins = getDataPinString();
+        img.dataset.pins = generateDataPinString();
 
         var source =
             (document.querySelector('.general_edit .image_invert_colors').checked ?
@@ -629,7 +816,10 @@
         return source;
     }
 
-    function getDataPinString() {
+    /**
+     * Generate the `data-pins` string for the clickimage.js source code.
+     */
+    function generateDataPinString() {
         var string = "";
 
         var pins = document.querySelectorAll('.image_wrap .image_con > .image_pin');
@@ -647,6 +837,9 @@
         return string;
     }
 
+    /**
+     * Generate the `.pininfo` children source code from the HTML contents.
+     */
     function getPinInfoString() {
         var string = "";
 
@@ -668,15 +861,28 @@
 
     // Helpers
 
+    /**
+     * Returns if the device supports drag and drop.
+     */
     function dragDropSupported() {
         var div = document.createElement('div');
         return ('draggable' in div) || ('ondragstart' in div && 'ondrop' in div);
     }
 
+    /**
+     * Returns if the device supports the `FileReader` class.
+     */
     function fileReaderSupported() {
         return 'FileReader' in window;
     }
 
+    /**
+     * Calculates absolute coordinates as offset from the given parent elements
+     * top left corner.
+     * @param {Event} event the click/... event
+     * @param {HTMLElement} parent the container element to calculate the
+     * offset of.
+     */
     function getPosition(event, parent) {
         var pos = {};
 
@@ -689,6 +895,13 @@
         return pos;
     }
 
+    /**
+     * Calculates relative coordinates as offset from the given parent elements
+     * top left corner. x and y given in the interval [0, 1].
+     * @param {Event} event the click/... event
+     * @param {HTMLElement} parent the container element to calculate the
+     * offset of.
+     */
     function getPositionRel(event, parent) {
         var pos = getPosition(event, parent);
 
@@ -698,12 +911,22 @@
         return pos;
     }
 
+    /**
+     * Remove a specific class for an array of HTMLElements. The class does not
+     * need to be present.
+     * @param {HTMLElement[]} elements the elements to remove the class from
+     * @param {String} clazz the class to remove
+     */
     function removeClassForAll(elements, clazz) {
         for(var i = 0; i < elements.length; i++) {
             elements[i].classList.remove(clazz);
         }
     }
 
+    /**
+     * Converts a touch event to the corresponding mouse event and emits it.
+     * @param {TouchEvent} event
+     */
     function touchHandler(event) {
         var touches = event.changedTouches,
             first = touches[0],
@@ -733,6 +956,9 @@
 
     // const elements
 
+    /**
+     * Source code of the default edit panel, without any values set.
+     */
     var DEFAULT_EDIT_PANEL =
         '<div class="edit_panel">'
         + '<div class="edit_tools">'
@@ -765,6 +991,12 @@
         + '<textarea class="pin_text" placeholder="Enter HTML..."></textarea>'
         + '</div >';
 
+    /**
+    * Source code of the default `.clickimage` div. Contains HTML comments to
+    * be replaced by their content.
+    * - `<!--img-->`: needs to be replaced by the <img ...> element
+    * - `<!--pins-->`: needs to be replaced by the `.pininfo` content.
+    */
     var DEFAULT_CLICKIMAGE_SOURCE =
         '<div class="clickimage">\r\n'
         + '    <div class="imagebox">\r\n'
@@ -775,6 +1007,12 @@
         + '    </div>\r\n'
         + '</div>\r\n';
 
+    /**
+     * Source code of the default `.clickimage` div with inverted class.
+     * Contains HTML comments to be replaced by their content.
+     * - `<!--img-->`: needs to be replaced by the <img ...> element
+     * - `<!--pins-->`: needs to be replaced by the `.pininfo` content.
+     */
     var DEFAULT_CLICKIMAGE_SOURCE_INVERTED =
         '<div class="clickimage">\r\n'
         + '    <div class="imagebox invert">\r\n'
